@@ -23,6 +23,9 @@ class Employee extends Person{
     console.log('i am workinh')
   }
 }
+var workrs : Array<Person> = [];
+workrs[0] = new Person('123');
+workrs[1] = new Employee('123','2')
 var e1 = new Employee('123', '1')
 var p1 = new Person("22323")
 p1.eat();

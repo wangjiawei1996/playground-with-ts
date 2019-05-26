@@ -125,12 +125,23 @@ var Grid = function () {
       });
       this._$container.append($divArray);
     }
+  }, {
+    key: "layout",
+    value: function layout() {
+      var width = $("span:first", this._$container).width();
+      $("span", this._$container).height(width).css({
+        "line-height": width + "px",
+        "font-size": width < 32 ? width / 2 + "px" : ""
+      });
+    }
   }]);
 
   return Grid;
 }();
 
-new Grid($("#container")).build();
+var grid = new Grid($("#container"));
+grid.build();
+grid.layout();
 
 /***/ }),
 

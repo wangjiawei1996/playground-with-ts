@@ -13,7 +13,7 @@ gulp.task('webpack', done => {
 })
 
 // 编译 less -> css
-gulp.task('css', done => {
+gulp.task('less', done => {
     const less = require('gulp-less')
     gulp.src('../src/less/*.less')
         .pipe(less())
@@ -23,4 +23,10 @@ gulp.task('css', done => {
 })
 
 // 顺序执行webpack、css两个任务
-gulp.task('default', gulp.series('webpack', 'css'))
+gulp.task('default',['webpack', 'less']);
+
+
+gulp.task("watch", () => {
+    gulp.watch("less/**/*.less", ["less"]);
+    gulp.watch("js/**/*.js", ["js"]);
+});

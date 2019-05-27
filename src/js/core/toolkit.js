@@ -16,4 +16,24 @@
     return array;
   }
  };
- module.exports = matrixToolkit
+ /**
+  * 宫坐标系工具
+  */
+ const boxToolit = {
+
+ };
+ // 工具集
+ module.exports = class Toolkit {
+   /**
+    * 矩阵和数据相关的数据
+    */
+   static get matrix() {
+     return matrixToolkit;
+   }
+   /**
+    * 宫坐标系相关的工具
+    */
+   static get box() {
+     return boxToolit;
+   }
+ }

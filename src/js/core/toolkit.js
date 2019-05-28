@@ -14,6 +14,12 @@
       [array[i], array[j]] = [array[j], array[i]]
     }
     return array;
+  },
+  /**
+   * 检查指定位置是否可以填写 n
+   */
+  checkFileable() {
+    return true
   }
  };
  /**

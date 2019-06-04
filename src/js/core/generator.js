@@ -1,6 +1,6 @@
 // 生成数独解决方案的方法
 const Toolkit = require('./toolkit')
-class Generator {
+module.exports = class Generator {
 
   generator () {
     while (!this.internalGenerator()) {
@@ -63,9 +63,4 @@ class Generator {
 
     return false;
   }
-}
-
-
-const generator = new Generator();
-generator.generator();
-console.log(generator.matrix);
+};

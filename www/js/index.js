@@ -86,6 +86,147 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./js/core/generator.js":
+/*!******************************!*\
+  !*** ./js/core/generator.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// 生成数独解决方案的方法
+var Toolkit = __webpack_require__(/*! ./toolkit */ "./js/core/toolkit.js");
+module.exports = function () {
+  function Generator() {
+    _classCallCheck(this, Generator);
+  }
+
+  _createClass(Generator, [{
+    key: 'generator',
+    value: function generator() {
+      while (!this.internalGenerator()) {
+        // TODO
+        // console.warn('try again');
+      }
+    }
+  }, {
+    key: 'internalGenerator',
+    value: function internalGenerator() {
+      this.matrix = Toolkit.matrix.makeMatrix();
+      this.orders = Toolkit.matrix.makeMatrix().map(function (row) {
+        return row.map(function (v, i) {
+          return i;
+        });
+      }).map(function (row) {
+        return Toolkit.matrix.shuffle(row);
+      });
+
+      // Toolkit.matrix.makeRow()
+      for (var n = 1; n <= 9; n++) {
+        if (!this.fillNumber(n)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }, {
+    key: 'fillNumber',
+    value: function fillNumber(n) {
+      return this.fillRow(n, 0);
+    }
+  }, {
+    key: 'fillRow',
+    value: function fillRow(n, rowIndex) {
+      if (rowIndex > 8) {
+        return true;
+      }
+
+      var row = this.matrix[rowIndex];
+      // 随机选择列
+      var orders = this.orders[rowIndex];
+
+      for (var i = 0; i < 9; i++) {
+        var colIndex = orders[i];
+
+        // 如果该位置已经有值，则跳过
+        if (row[colIndex]) {
+          continue;
+        }
+
+        // 检查此位置是否可以填 n （!列和宫都存在）
+        if (!Toolkit.matrix.checkFillable(this.matrix, n, rowIndex, colIndex)) {
+          continue;
+        }
+
+        row[colIndex] = n;
+        // 当前行填写 n 成功，递归调用 fillRow() 在下一行中填写 n
+        // 去下一行填写 n，如果没填进去，就继续寻找当前行的下一个位置
+        if (!this.fillRow(n, rowIndex + 1)) {
+          row[colIndex] = 0;
+          continue;
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+  }]);
+
+  return Generator;
+}();
+
+/***/ }),
+
+/***/ "./js/core/soduko.js":
+/*!***************************!*\
+  !*** ./js/core/soduko.js ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// 生成数独游戏
+var Generator = __webpack_require__(/*! ./generator */ "./js/core/generator.js");
+module.exports = function () {
+  function Sudoku() {
+    _classCallCheck(this, Sudoku);
+
+    var generator = new Generator();
+    generator.generator();
+    this.solutionMatrix = generator.matrix;
+  }
+
+  _createClass(Sudoku, [{
+    key: 'make',
+    value: function make() {
+      var level = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 5;
+
+      this.puzzleMatrix = this.solutionMatrix.map(function (row) {
+        return row.map(function (cell) {
+          return Math.random() * 9 < level ? 0 : cell;
+        });
+      });
+    }
+  }]);
+
+  return Sudoku;
+}();
+
+/***/ }),
+
 /***/ "./js/core/toolkit.js":
 /*!****************************!*\
   !*** ./js/core/toolkit.js ***!
@@ -117,6 +258,13 @@ var matrixToolkit = {
       return _this.makeRow(v);
     });
   },
+
+
+  /**
+   * Fisher-Yates 洗牌算法
+   * 对传入数组进行随机排序，然后返回新数组
+   * @param {*} array
+   */
   shuffle: function shuffle(array) {
     var endIndex = array.length - 2;
     for (var i = 0; i <= endIndex; i++) {
@@ -126,13 +274,64 @@ var matrixToolkit = {
       array[j] = _ref[1];
     }
     return array;
+  },
+
+
+  /**
+   * TODO 检查指定位置可以填写数字 n
+  */
+  checkFillable: function checkFillable(matrix, n, rowIndex, colIndex) {
+    var row = matrix[rowIndex];
+    var col = this.makeRow().map(function (v, i) {
+      return matrix[i][colIndex];
+    });
+
+    var _boxToolkit$convertTo = boxToolkit.convertToBoxIndex(rowIndex, colIndex),
+        boxIndex = _boxToolkit$convertTo.boxIndex;
+
+    var box = boxToolkit.getBoxCells(matrix, boxIndex);
+
+    for (var i = 0; i < 9; i++) {
+      if (row[i] === n || col[i] === n || box[i] === n) {
+        return false;
+      }
+    }
+    return true;
   }
 };
+
 /**
  * 宫坐标系工具
- */
-var boxToolit = {};
+*/
+var boxToolkit = {
+  convertToBoxIndex: function convertToBoxIndex(rowIndex, colIndex) {
+    return {
+      boxIndex: Math.floor(rowIndex / 3) * 3 + Math.floor(colIndex / 3),
+      cellIndex: rowIndex % 3 * 3 + colIndex % 3
+    };
+  },
+  convertFromBoxIndex: function convertFromBoxIndex(boxIndex, cellIndex) {
+    return {
+      rowIndex: Math.floor(boxIndex / 3) * 3 + Math.floor(cellIndex / 3),
+      colIndex: boxIndex % 3 * 3 + cellIndex % 3
+    };
+  },
+  getBoxCells: function getBoxCells(matrix, boxIndex) {
+    var startRowIndex = Math.floor(boxIndex / 3) * 3;
+    var startColIndex = boxIndex % 3 * 3;
+    var result = [];
+
+    for (var cellIndex = 0; cellIndex < 9; cellIndex++) {
+      var rowIndex = startRowIndex + Math.floor(cellIndex / 3);
+      var colIndex = startColIndex + cellIndex % 3;
+      result.push(matrix[rowIndex][colIndex]);
+    }
+    return result;
+  }
+};
+
 // 工具集
+
 module.exports = function () {
   function Toolkit() {
     _classCallCheck(this, Toolkit);
@@ -142,19 +341,20 @@ module.exports = function () {
     key: "matrix",
 
     /**
-     * 矩阵和数据相关的数据
+     * 矩阵和数据相关工具
      */
     get: function get() {
       return matrixToolkit;
     }
+
     /**
-     * 宫坐标系相关的工具
+     * 宫坐标系相关工具
      */
 
   }, {
     key: "box",
     get: function get() {
-      return boxToolit;
+      return boxToolkit;
     }
   }]);
 
@@ -197,6 +397,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // 生成九宫格
 var Toolkit = __webpack_require__(/*! ../core/toolkit */ "./js/core/toolkit.js");
+var Sudoku = __webpack_require__(/*! ../core/soduko */ "./js/core/soduko.js");
 
 var Grid = function () {
   function Grid(container) {
@@ -206,14 +407,19 @@ var Grid = function () {
   }
 
   _createClass(Grid, [{
-    key: "build",
+    key: 'build',
     value: function build() {
-      var matrix = Toolkit.matrix.makeMatrix();
+      // const generator = new Generator();
+      // generator.generator();
+      // const matrix = generator.matrix;
+      var sudoku = new Sudoku();
+      sudoku.make();
+      var matrix = sudoku.puzzleMatrix;
       var rowGroupClasses = ["row_g_top", "row_g_middle", "row_g_bottom"];
       var colGroupClasses = ["col_g_left", "col_g_center", "col_g_right"];
       var $cells = matrix.map(function (rowValues) {
         return rowValues.map(function (cellValue, colIndex) {
-          return $("<span>").addClass(colGroupClasses[colIndex % 3]).text(cellValue);
+          return $("<span>").addClass(colGroupClasses[colIndex % 3]).addClass(cellValue ? "fixed" : "empty").text(cellValue);
         });
       });
       var $divArray = $cells.map(function ($spanArray, rowIndex) {
@@ -222,12 +428,12 @@ var Grid = function () {
       this._$container.append($divArray);
     }
   }, {
-    key: "layout",
+    key: 'layout',
     value: function layout() {
       var width = $("span:first", this._$container).width();
       $("span", this._$container).height(width).css({
-        "line-height": width + "px",
-        "font-size": width < 32 ? width / 2 + "px" : ""
+        "line-height": width + 'px',
+        "font-size": width < 32 ? width / 2 + 'px' : ""
       });
     }
   }]);

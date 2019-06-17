@@ -37,5 +37,14 @@ class Grid {
         "font-size": width < 32 ? `${width / 2}px` : ""
       });
   }
+  bindPopup(popupNumbers) {
+    this._$container.on("click", "span", e => {
+        const $cell = $(e.target);
+        if ($cell.is('.fixed')) {
+          return;
+        }
+        popupNumbers.popup($cell);
+    })
+  }
 }
 module.exports = Grid;

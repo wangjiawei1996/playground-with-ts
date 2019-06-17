@@ -374,10 +374,14 @@ module.exports = function () {
 
 
 var Grid = __webpack_require__(/*! ./ui/grid */ "./js/ui/grid.js");
+var PopupNumbers = __webpack_require__(/*! ./ui/popupnumbers */ "./js/ui/popupnumbers.js");
 
 var grid = new Grid($("#container"));
 grid.build();
 grid.layout();
+
+var popupNumbers = new PopupNumbers($("#popupNumbers"));
+grid.bindPopup(popupNumbers);
 
 /***/ }),
 
@@ -436,12 +440,102 @@ var Grid = function () {
         "font-size": width < 32 ? width / 2 + 'px' : ""
       });
     }
+  }, {
+    key: 'bindPopup',
+    value: function bindPopup(popupNumbers) {
+      this._$container.on("click", "span", function (e) {
+        var $cell = $(e.target);
+        if ($cell.is('.fixed')) {
+          return;
+        }
+        popupNumbers.popup($cell);
+      });
+    }
   }]);
 
   return Grid;
 }();
 
 module.exports = Grid;
+
+/***/ }),
+
+/***/ "./js/ui/popupnumbers.js":
+/*!*******************************!*\
+  !*** ./js/ui/popupnumbers.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// 处理弹出的操作面板
+module.exports = function () {
+    function PopupNumbers($panel) {
+        var _this = this;
+
+        _classCallCheck(this, PopupNumbers);
+
+        this._$panel = $panel.hide().removeClass('hidden');
+        this._$panel.on('click', 'span', function (e) {
+            var $span = $(e.target);
+            var $cell = _this._$targetCell;
+
+            // mark1，mark2 回填样式
+            if ($span.hasClass('mark1')) {
+                // 回填样式
+                if ($cell.hasClass('mark1')) {
+                    $cell.removeClass('mark1');
+                } else {
+                    $cell.removeClass('mark2').addClass('mark1');
+                }
+            } else if ($span.hasClass('mark2')) {
+                // 回填样式
+                if ($cell.hasClass('mark2')) {
+                    $cell.removeClass('mark2');
+                } else {
+                    $cell.removeClass('mark1').addClass('mark2');
+                }
+            } else if ($span.hasClass('empty')) {
+                // 取消数字填写， 取消mark
+                $cell.text(0).addClass('empty').removeClass('mark1 mark2');
+            } else {
+                // 1-9 会填数字
+                $cell.removeClass('empty').text($span.text());
+            }
+
+            _this.hide();
+        });
+    }
+
+    _createClass(PopupNumbers, [{
+        key: 'popup',
+        value: function popup($cell) {
+            this._$targetCell = $cell;
+
+            var _$cell$position = $cell.position(),
+                left = _$cell$position.left,
+                top = _$cell$position.top;
+
+            this._$panel.css({
+                left: left + 'px',
+                top: top + 'px'
+            }).show();
+        }
+    }, {
+        key: 'hide',
+        value: function hide() {
+            this._$panel.hide();
+        }
+    }]);
+
+    return PopupNumbers;
+}();
 
 /***/ })
 

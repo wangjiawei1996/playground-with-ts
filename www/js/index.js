@@ -383,6 +383,13 @@ grid.layout();
 var popupNumbers = new PopupNumbers($("#popupNumbers"));
 grid.bindPopup(popupNumbers);
 
+$("#check").on("click", function (e) {});
+$("#reset").on("click", function (e) {});
+$("#clear").on("click", function (e) {});
+$("#rebuild").on("click", function (e) {
+  grid.rebuild();
+});
+
 /***/ }),
 
 /***/ "./js/ui/grid.js":
@@ -439,6 +446,13 @@ var Grid = function () {
         "line-height": width + 'px',
         "font-size": width < 32 ? width / 2 + 'px' : ""
       });
+    }
+  }, {
+    key: 'rebuild',
+    value: function rebuild() {
+      this._$container.empty();
+      this.build();
+      this.layout();
     }
   }, {
     key: 'bindPopup',

@@ -1,6 +1,7 @@
 // 生成九宫格
 const Toolkit = require('../core/toolkit');
 const Sudoku = require('../core/soduko')
+const Checker = require('../core/checker')
 class Grid {
   constructor(container) {
     this._$container = container;
@@ -36,6 +37,42 @@ class Grid {
         "line-height": `${width}px`,
         "font-size": width < 32 ? `${width / 2}px` : ""
       });
+  }
+  check () {
+    // 获取需要检测的数据
+    const data = this._$container.children().map((rowIndex, div) => {
+        return $(div).children().map((colIndex, span) => parseInt($(span).text()) || 0);
+    })
+    .toArray()
+    .map($data => $data.toArray());
+    const checker = new Checker(data);
+    if (checker.check()) {
+        return true;
+    }
+
+    // 检查不成功，进行标记
+    const marks = checker.matrixMarks;
+    this._$container.children().each((rowIndex, div) => {
+        $(div).children().each((colIndex, span) => {
+            const $span = $(span);
+            if ($span.is('.fixed') || marks[rowIndex][colIndex]) {
+                $span.removeClass('error');
+            } else {
+                $span.addClass('error');
+            }
+        })
+    })
+}
+  reset() {
+
+  }
+  clear() {
+
+  }
+  rebuild() {
+    this._$container.empty();
+    this.build();
+    this.layout();
   }
   bindPopup(popupNumbers) {
     this._$container.on("click", "span", e => {

@@ -86,6 +86,146 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./js/core/checker.js":
+/*!****************************!*\
+  !*** ./js/core/checker.js ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// 检查数独
+
+function checkArray(array) {
+    var length = array.length;
+    var marks = new Array(length);
+    marks.fill(true);
+    for (var i = 0; i < length - 1; i++) {
+        if (!marks[i]) {
+            continue;
+        }
+        var v = array[i];
+        // 是否有效 0-无效
+        if (!v) {
+            marks[i] = false;
+            continue;
+        }
+
+        // 是否有重复：i+1 ~ 9，是否和i位置重复
+        for (var j = i + 1; j < length; j++) {
+            if (v === array[j]) {
+                marks[i] = marks[j] = false;
+            }
+        }
+    }
+    return marks;
+}
+
+// console.log(checkArray([1, 2, 3, 4, 4, 5, 7, 4, 9]));
+
+
+var Toolkit = __webpack_require__(/*! ./toolkit */ "./js/core/toolkit.js");
+
+// 输入：matrix，用户完成数独数据，9X9
+// 处理：对matrix 行、列、宫进行检查， 并填写marks
+// 输出：检查是否成功、marks
+
+var Checker = function () {
+    function Checker(matrix) {
+        _classCallCheck(this, Checker);
+
+        this._matrix = matrix;
+        this._matrixMarks = Toolkit.matrix.makeMatrix(true);
+    }
+
+    _createClass(Checker, [{
+        key: 'check',
+        value: function check() {
+            this.checkRows();
+            this.checkCols();
+            this.checkBoxes();
+
+            // 检查是否成功
+            this._success = this._matrixMarks.every(function (row) {
+                return row.every(function (mark) {
+                    return mark;
+                });
+            });
+            return this._success;
+        }
+    }, {
+        key: 'checkRows',
+        value: function checkRows() {
+            for (var rowIndex = 0; rowIndex < 9; rowIndex++) {
+                var row = this._matrix[rowIndex];
+                var marks = checkArray(row);
+
+                for (var colIndex = 0; colIndex < marks.length; colIndex++) {
+                    if (!marks[colIndex]) {
+                        this._matrixMarks[rowIndex][colIndex] = false;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'checkCols',
+        value: function checkCols() {
+            for (var colIndex = 0; colIndex < 9; colIndex++) {
+                var col = [];
+                for (var rowIndex = 0; rowIndex < 9; rowIndex++) {
+                    col[rowIndex] = this._matrix[rowIndex][colIndex];
+                }
+                var marks = checkArray(col);
+                for (var _rowIndex = 0; _rowIndex < marks.length; _rowIndex++) {
+                    if (!marks[_rowIndex]) {
+                        this._matrixMarks[_rowIndex][colIndex] = false;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'checkBoxes',
+        value: function checkBoxes() {
+            for (var boxIndex = 0; boxIndex < 9; boxIndex++) {
+                var box = Toolkit.box.getBoxCells(this._matrix, boxIndex);
+                var marks = checkArray(box);
+
+                for (var cellIndex = 0; cellIndex < marks.length; cellIndex++) {
+                    if (!marks[cellIndex]) {
+                        var _Toolkit$box$convertF = Toolkit.box.convertFromBoxIndex(boxIndex, cellIndex),
+                            rowIndex = _Toolkit$box$convertF.rowIndex,
+                            colIndex = _Toolkit$box$convertF.colIndex;
+
+                        this._matrixMarks[rowIndex][colIndex] = false;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'matrixMarks',
+        get: function get() {
+            return this._matrixMarks;
+        }
+    }, {
+        key: 'isSuccess',
+        get: function get() {
+            return this._success;
+        }
+    }]);
+
+    return Checker;
+}();
+
+module.exports = Checker;
+
+/***/ }),
+
 /***/ "./js/core/generator.js":
 /*!******************************!*\
   !*** ./js/core/generator.js ***!
@@ -383,9 +523,15 @@ grid.layout();
 var popupNumbers = new PopupNumbers($("#popupNumbers"));
 grid.bindPopup(popupNumbers);
 
-$("#check").on("click", function (e) {});
-$("#reset").on("click", function (e) {});
-$("#clear").on("click", function (e) {});
+$("#check").on("click", function (e) {
+  grid.check();
+});
+$("#reset").on("click", function (e) {
+  grid.reset();
+});
+$("#clear").on("click", function (e) {
+  grid.clear();
+});
 $("#rebuild").on("click", function (e) {
   grid.rebuild();
 });
@@ -409,6 +555,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // 生成九宫格
 var Toolkit = __webpack_require__(/*! ../core/toolkit */ "./js/core/toolkit.js");
 var Sudoku = __webpack_require__(/*! ../core/soduko */ "./js/core/soduko.js");
+var Checker = __webpack_require__(/*! ../core/checker */ "./js/core/checker.js");
 
 var Grid = function () {
   function Grid(container) {
@@ -447,6 +594,41 @@ var Grid = function () {
         "font-size": width < 32 ? width / 2 + 'px' : ""
       });
     }
+  }, {
+    key: 'check',
+    value: function check() {
+      // 获取需要检测的数据
+      var data = this._$container.children().map(function (rowIndex, div) {
+        return $(div).children().map(function (colIndex, span) {
+          return parseInt($(span).text()) || 0;
+        });
+      }).toArray().map(function ($data) {
+        return $data.toArray();
+      });
+      var checker = new Checker(data);
+      if (checker.check()) {
+        return true;
+      }
+
+      // 检查不成功，进行标记
+      var marks = checker.matrixMarks;
+      this._$container.children().each(function (rowIndex, div) {
+        $(div).children().each(function (colIndex, span) {
+          var $span = $(span);
+          if ($span.is('.fixed') || marks[rowIndex][colIndex]) {
+            $span.removeClass('error');
+          } else {
+            $span.addClass('error');
+          }
+        });
+      });
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {}
+  }, {
+    key: 'clear',
+    value: function clear() {}
   }, {
     key: 'rebuild',
     value: function rebuild() {

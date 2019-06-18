@@ -57,8 +57,14 @@ body > * {
 .container .row > span.empty {
   color: white;
 }
-.container .row > span.mark1 {
+.container .row > span.error {
   background: lightpink;
+}
+.container .row > span.error.empty {
+  color: lightpink;
+}
+.container .row > span.mark1 {
+  background: lightblue;
 }
 .container .row > span.mark2 {
   background: lightgreen;
@@ -104,8 +110,14 @@ body > * {
 .popup-num .row > span.empty {
   color: white;
 }
-.popup-num .row > span.mark1 {
+.popup-num .row > span.error {
   background: lightpink;
+}
+.popup-num .row > span.error.empty {
+  color: lightpink;
+}
+.popup-num .row > span.mark1 {
+  background: lightblue;
 }
 .popup-num .row > span.mark2 {
   background: lightgreen;

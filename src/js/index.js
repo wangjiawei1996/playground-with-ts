@@ -8,8 +8,10 @@ grid.layout();
 const popupNumbers = new PopupNumbers($("#popupNumbers"));
 grid.bindPopup(popupNumbers);
 
-$("#check").on("click", e => {
-  grid.check()
+$('#check').on('click', e => {
+  if (grid.check()) {
+     alert('成功');
+  }
 });
 $("#reset").on("click", e => {
   grid.reset()

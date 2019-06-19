@@ -625,10 +625,14 @@ var Grid = function () {
     }
   }, {
     key: 'reset',
-    value: function reset() {}
+    value: function reset() {
+      this._$container.children().find('span:not(.fixed)').removeClass('error mark1 mark2').addClass('empty').text(0);
+    }
   }, {
     key: 'clear',
-    value: function clear() {}
+    value: function clear() {
+      this._$container.children().find('span.error').removeClass('error');
+    }
   }, {
     key: 'rebuild',
     value: function rebuild() {

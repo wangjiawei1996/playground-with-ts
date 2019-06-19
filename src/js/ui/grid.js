@@ -64,10 +64,10 @@ class Grid {
     })
 }
   reset() {
-
+    this._$container.children().find('span:not(.fixed)').removeClass('error mark1 mark2').addClass('empty').text(0);
   }
   clear() {
-
+    this._$container.children().find('span.error').removeClass('error');
   }
   rebuild() {
     this._$container.empty();
